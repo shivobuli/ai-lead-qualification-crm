@@ -2,13 +2,9 @@
 
 An AI-assisted lead qualification and CRM automation workflow built with **n8n, JavaScript, Google Sheets, and Gmail**.
 
-This project demonstrates how incoming business leads can be automatically validated, analyzed, scored, prioritized, recorded in a CRM-style Google Sheet, and routed for follow-up.
+This portfolio project demonstrates how business leads can be automatically validated, analyzed, scored, prioritized, stored in a CRM-style Google Sheet, and routed for follow-up.
 
-## Project Overview
-
-The workflow automates the initial lead qualification process so that sales teams can quickly identify leads that may require immediate attention.
-
-### Workflow
+## Workflow
 
 ```text
 Lead Input
@@ -27,30 +23,25 @@ Duplicate Check
     ↓
 Google Sheets CRM
     ↓
-Priority-based Email Notification
+Email Notification
 ```
 
 ## Key Features
 
 * Lead data validation
-* Rule-based AI-assisted lead analysis
-* Automated qualification scoring
+* Automated lead analysis
+* Qualification scoring
 * High, Medium, and Low priority classification
 * Recommended follow-up action
-* Duplicate lead detection using Lead ID
-* Existing lead record update
-* New lead record creation
+* Duplicate detection using Lead ID
+* Existing lead update
+* New lead creation
 * Google Sheets CRM integration
-* High Priority email notification
-* Medium Priority email notification
-* Low Priority leads retained without unnecessary email alerts
-* JavaScript-based workflow logic
+* Priority-based Gmail notifications
 
 ## Qualification Scoring
 
-The workflow evaluates six qualification factors:
-
-| Qualification factor         |   Score |
+| Factor                       |   Score |
 | ---------------------------- | ------: |
 | Clear requirement            |      20 |
 | Defined budget               |      15 |
@@ -58,9 +49,9 @@ The workflow evaluates six qualification factors:
 | High purchase intent         |      20 |
 | Suitable service             |      20 |
 | Complete contact information |      10 |
-| **Maximum score**            | **100** |
+| **Maximum**                  | **100** |
 
-Priority levels:
+### Priority Levels
 
 * **80–100:** High Priority
 * **60–79:** Medium Priority
@@ -73,14 +64,14 @@ The workflow uses `lead_id` as the unique identifier.
 
 When a lead is received:
 
-1. The workflow checks whether the Lead ID already exists.
-2. If the lead exists, the existing Google Sheets record is updated.
-3. If the lead is new, a new CRM record is created.
-4. The result is then routed according to lead priority.
+1. Check whether the Lead ID already exists.
+2. Update the existing record if found.
+3. Append a new record if it does not exist.
+4. Route the lead according to its priority.
 
-This prevents repeated workflow executions from unnecessarily creating duplicate CRM records.
+This prevents repeated executions from unnecessarily creating duplicate CRM records.
 
-## Example Test Results
+## Test Results
 
 | Lead ID | Score | Priority        | CRM Result | Notification          |
 | ------- | ----: | --------------- | ---------- | --------------------- |
@@ -94,25 +85,29 @@ These are controlled demonstration leads used to test the workflow.
 
 * **n8n** — Workflow automation
 * **JavaScript** — Qualification and routing logic
-* **Google Sheets** — CRM-style lead storage
-* **Gmail** — Automated notifications
+* **Google Sheets** — CRM-style storage
+* **Gmail** — Email notifications
 
-## What This Project Demonstrates
+## What This Demonstrates
 
-This project demonstrates practical experience with:
-
-* Workflow automation
 * Business process automation
+* Workflow design
 * Conditional logic
-* Data validation
-* Data transformation
+* Data validation and transformation
 * CRM automation
-* Google Workspace integrations
+* Google Workspace integration
 * Email automation
 * Duplicate prevention
 * Debugging and data mapping
-* Building practical AI-assisted business workflows
 
 ## Project Scope
 
-This is a **portf**
+This is a **portfolio proof-of-concept**, not a production CRM.
+
+The workflow demonstrates practical automation capabilities that can be extended to website forms, AI/LLM qualification, databases, dashboards, and other CRM integrations.
+
+## Author
+
+**Obulisivananthan V R**
+
+AI Automation | GenAI Applications | n8n Workflows | Python
