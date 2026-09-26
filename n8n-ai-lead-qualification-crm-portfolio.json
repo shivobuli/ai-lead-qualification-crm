@@ -1,0 +1,958 @@
+{
+    "name":  "AI Lead Qualification CRM – Automation",
+    "nodes":  [
+                  {
+                      "parameters":  {
+
+                                     },
+                      "type":  "n8n-nodes-base.manualTrigger",
+                      "typeVersion":  1,
+                      "position":  [
+                                       0,
+                                       32
+                                   ],
+                      "id":  "e5874b3a-5e24-4002-8c95-993bc969602e",
+                      "name":  "When clicking ‘Execute workflow’"
+                  },
+                  {
+                      "parameters":  {
+                                         "assignments":  {
+                                                             "assignments":  [
+                                                                                 {
+                                                                                     "id":  "61f40a25-0fff-4cd5-afdf-722794974b89",
+                                                                                     "name":  "lead_id",
+                                                                                     "value":  "L013",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "3e7e931c-6a2f-4b80-8111-a5812adc2716",
+                                                                                     "name":  "name",
+                                                                                     "value":  "Ravi Kumar",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "4a33a4bd-9fe5-49a9-a6be-621e3e21f8c3",
+                                                                                     "name":  "company",
+                                                                                     "value":  "Growth Startup",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "342c3d53-27d9-4380-a7dd-3b8c4efc92eb",
+                                                                                     "name":  "email",
+                                                                                     "value":  "ravi@example.com",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "c289f7ec-5243-40e7-bf83-aa81c18ca152",
+                                                                                     "name":  "service_required",
+                                                                                     "value":  "AI automation ",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "0d3fc99f-27d5-4052-9db1-5e87b889ced8",
+                                                                                     "name":  "budget",
+                                                                                     "value":  "0",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "132509d3-e507-4b0c-9988-4cd1f27815a8",
+                                                                                     "name":  "timeline",
+                                                                                     "value":  "30 days",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "b8ba84ee-89df-4574-b8b9-7a1c9eb17ebd",
+                                                                                     "name":  "message",
+                                                                                     "value":  "We need AI automation for our business and would like to understand the available options.",
+                                                                                     "type":  "string"
+                                                                                 }
+                                                                             ]
+                                                         },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.set",
+                      "typeVersion":  3.5,
+                      "position":  [
+                                       224,
+                                       32
+                                   ],
+                      "id":  "990ef58a-a8da-4ba3-8658-871a804a4bed",
+                      "name":  "Lead Input"
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "const lead = $input.first().json;\n\nconst requiredFields = [\n  \"lead_id\",\n  \"name\",\n  \"company\",\n  \"email\",\n  \"service_required\",\n  \"message\"\n];\n\nconst missingFields = requiredFields.filter(\n  field =\u003e !lead[field] || String(lead[field]).trim() === \"\"\n);\n\nconst emailValid = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(lead.email);\n\nconst valid = missingFields.length === 0 \u0026\u0026 emailValid;\n\nreturn [\n  {\n    json: {\n      ...lead,\n      validation: {\n        valid,\n        missing_fields: missingFields,\n        email_valid: emailValid\n      }\n    }\n  }\n];"
+                                     },
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       448,
+                                       32
+                                   ],
+                      "id":  "fab54000-1193-4204-966c-b4582a5676cb",
+                      "name":  "Validate Lead"
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "const lead = $input.first().json;\n\nconst message = String(lead.message || \"\").toLowerCase();\nconst service = String(lead.service_required || \"\").toLowerCase();\nconst budget = Number(lead.budget || 0);\nconst timeline = String(lead.timeline || \"\").toLowerCase();\n\nconst clearRequirement =\n  message.length \u003e= 40 \u0026\u0026\n  (service.length \u003e 0);\n\nconst definedBudget = budget \u003e 0;\n\nconst urgentRequirement =\n  timeline.includes(\"today\") ||\n  timeline.includes(\"urgent\") ||\n  timeline.includes(\"24\") ||\n  timeline.includes(\"48\") ||\n  timeline.includes(\"2 days\");\n\nconst highPurchaseIntent =\n  message.includes(\"need\") ||\n  message.includes(\"ready\") ||\n  message.includes(\"hire\") ||\n  message.includes(\"looking for\") ||\n  message.includes(\"want\");\n\nconst suitableService =\n  service.includes(\"automation\") ||\n  service.includes(\"ai\") ||\n  service.includes(\"lead\") ||\n  service.includes(\"crm\");\n\nconst completeContactInfo =\n  Boolean(lead.name) \u0026\u0026\n  Boolean(lead.email) \u0026\u0026\n  Boolean(lead.company);\n\nreturn [\n  {\n    json: {\n      ...lead,\n      analysis: {\n        clear_requirement: clearRequirement,\n        defined_budget: definedBudget,\n        urgent_requirement: urgentRequirement,\n        high_purchase_intent: highPurchaseIntent,\n        suitable_service: suitableService,\n        complete_contact_info: completeContactInfo\n      }\n    }\n  }\n];"
+                                     },
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       672,
+                                       32
+                                   ],
+                      "id":  "7262663e-3650-4e58-ac9d-2e2aefda200a",
+                      "name":  "Analyze Lead"
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "const lead = $input.first().json;\nconst analysis = lead.analysis || {};\n\nlet score = 0;\n\nif (analysis.clear_requirement) score += 20;\nif (analysis.defined_budget) score += 15;\nif (analysis.urgent_requirement) score += 15;\nif (analysis.high_purchase_intent) score += 20;\nif (analysis.suitable_service) score += 20;\nif (analysis.complete_contact_info) score += 10;\n\nlet priority;\n\nif (score \u003e= 80) {\n  priority = \"High Priority\";\n} else if (score \u003e= 60) {\n  priority = \"Medium Priority\";\n} else if (score \u003e= 40) {\n  priority = \"Low Priority\";\n} else {\n  priority = \"Nurture / Review\";\n}\n\nreturn [{\n  json: {\n    ...lead,\n    score,\n    priority\n  }\n}];"
+                                     },
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       896,
+                                       32
+                                   ],
+                      "id":  "f252f5b2-9834-4618-b6c8-f69c74c134ea",
+                      "name":  "Calculate Score"
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "const lead = $input.first().json;\nconst analysis = lead.analysis || {};\n\nlet recommendedAction;\nlet followUpPriority;\n\nif (lead.priority === \"High Priority\" \u0026\u0026 analysis.urgent_requirement) {\n  recommendedAction = \"Contact immediately\";\n  followUpPriority = \"High\";\n} else if (lead.priority === \"High Priority\") {\n  recommendedAction = \"Schedule sales call\";\n  followUpPriority = \"High\";\n} else if (\n  lead.priority === \"Medium Priority\" \u0026\u0026\n  analysis.high_purchase_intent\n) {\n  recommendedAction = \"Follow up within 2 business days\";\n  followUpPriority = \"Medium\";\n} else if (\n  lead.priority === \"Low Priority\" \u0026\u0026\n  analysis.clear_requirement\n) {\n  recommendedAction = \"Send qualification follow-up\";\n  followUpPriority = \"Low\";\n} else if (!analysis.complete_contact_info) {\n  recommendedAction = \"Request missing contact information\";\n  followUpPriority = \"Low\";\n} else {\n  recommendedAction = \"Nurture / request more information\";\n  followUpPriority = \"Low\";\n}\n\nreturn [{\n  json: {\n    ...lead,\n    recommended_action: recommendedAction,\n    follow_up_priority: followUpPriority\n  }\n}];"
+                                     },
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       1120,
+                                       32
+                                   ],
+                      "id":  "55bb6211-33a4-42e4-8abd-45a216d92977",
+                      "name":  "Recommend Action"
+                  },
+                  {
+                      "parameters":  {
+                                         "assignments":  {
+                                                             "assignments":  [
+                                                                                 {
+                                                                                     "id":  "87bbfd42-11bd-46fa-a6a5-b1e927c5de7a",
+                                                                                     "name":  "lead_id",
+                                                                                     "value":  "={{ $json.lead_id }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "b9a83454-67ef-4952-bb90-3856733f43af",
+                                                                                     "name":  "name",
+                                                                                     "value":  "={{ $json.name }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "a88af7c7-7fdb-4bb1-9fda-c2ae0a1e22b2",
+                                                                                     "name":  "company",
+                                                                                     "value":  "={{ $json.company }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "c8c24f10-fa7e-44a6-99f9-d953191eb5d8",
+                                                                                     "name":  "email",
+                                                                                     "value":  "={{ $json.email }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "1f7091a7-4c59-4ad0-aa02-beddfa1e559c",
+                                                                                     "name":  "service_required",
+                                                                                     "value":  "={{ $json.service_required }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "b76b379e-ed72-4d51-b4e1-f70246020a4b",
+                                                                                     "name":  "budget",
+                                                                                     "value":  "={{ $json.budget }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "1fcd3708-7df2-4d31-88e9-e7c5da607e88",
+                                                                                     "name":  "timeline",
+                                                                                     "value":  "={{ $json.timeline }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f2baa357-6d24-4617-8fe3-9d186686f4c3",
+                                                                                     "name":  "score",
+                                                                                     "value":  "={{ $json.score }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "66a570a8-2704-4b5b-a3b3-7941a03888a8",
+                                                                                     "name":  "priority",
+                                                                                     "value":  "={{ $json.priority }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "8d125b89-a162-442e-9e10-7b897eb12a89",
+                                                                                     "name":  "recommended_action",
+                                                                                     "value":  "={{ $json.recommended_action }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f65d71e9-1ffa-4c4c-bab1-2c765b1d62c7",
+                                                                                     "name":  "follow_up_priority",
+                                                                                     "value":  "={{ $json.follow_up_priority }}",
+                                                                                     "type":  "string"
+                                                                                 }
+                                                                             ]
+                                                         },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.set",
+                      "typeVersion":  3.5,
+                      "position":  [
+                                       1344,
+                                       32
+                                   ],
+                      "id":  "9610f286-eec4-4aab-a3ea-a3d8ea98e6bf",
+                      "name":  "CRM Record"
+                  },
+                  {
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  true,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "strict",
+                                                                            "version":  3
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "dcae3e74-4ce1-4f17-9660-87a3cdc1355a",
+                                                                                   "leftValue":  "={{ $json.priority }}",
+                                                                                   "rightValue":  "High Priority",
+                                                                                   "operator":  {
+                                                                                                    "type":  "string",
+                                                                                                    "operation":  "equals"
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        },
+                                         "options":  {
+                                                         "ignoreCase":  false
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2.3,
+                      "position":  [
+                                       2912,
+                                       128
+                                   ],
+                      "id":  "d4549d9a-f0fe-4245-a249-64e72dd99b6a",
+                      "name":  "High Priority Review"
+                  },
+                  {
+                      "parameters":  {
+                                         "documentId":  {
+                                                            "__rl":  true,
+                                                            "value":  "1LOUy9KIHJrAbuJg4oI0syiuPqvmiyin_-ykQtkPIa6A",
+                                                            "mode":  "list",
+                                                            "cachedResultName":  "AI Lead Qualification CRM",
+                                                            "cachedResultUrl":  "https://docs.google.com/spreadsheets/d/1LOUy9KIHJrAbuJg4oI0syiuPqvmiyin_-ykQtkPIa6A/edit?usp=drivesdk"
+                                                        },
+                                         "sheetName":  {
+                                                           "__rl":  true,
+                                                           "value":  "gid=0",
+                                                           "mode":  "list",
+                                                           "cachedResultName":  "Sheet1",
+                                                           "cachedResultUrl":  "https://docs.google.com/spreadsheets/d/1LOUy9KIHJrAbuJg4oI0syiuPqvmiyin_-ykQtkPIa6A/edit#gid=0"
+                                                       },
+                                         "filtersUI":  {
+                                                           "values":  [
+                                                                          {
+                                                                              "lookupColumn":  "lead_id",
+                                                                              "lookupValue":  "={{ $json.lead_id }}"
+                                                                          }
+                                                                      ]
+                                                       },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.googleSheets",
+                      "typeVersion":  4.7,
+                      "position":  [
+                                       1792,
+                                       32
+                                   ],
+                      "id":  "effcb59c-d5fe-49ac-b6ce-36f62f2f0398",
+                      "name":  "Get row(s) in sheet",
+                      "alwaysOutputData":  true
+                  },
+                  {
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  true,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "strict",
+                                                                            "version":  3
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "25b54677-b0a4-4beb-85b4-f8a626c0a22c",
+                                                                                   "leftValue":  "={{ $json.lead_id }}",
+                                                                                   "rightValue":  "",
+                                                                                   "operator":  {
+                                                                                                    "type":  "string",
+                                                                                                    "operation":  "notEmpty",
+                                                                                                    "singleValue":  true
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2.3,
+                      "position":  [
+                                       2016,
+                                       32
+                                   ],
+                      "id":  "f15a7fe9-7434-42ef-8cf4-9fd9ff6b5b0f",
+                      "name":  "Lead Already Exists?"
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "update",
+                                         "documentId":  {
+                                                            "__rl":  true,
+                                                            "value":  "1LOUy9KIHJrAbuJg4oI0syiuPqvmiyin_-ykQtkPIa6A",
+                                                            "mode":  "list",
+                                                            "cachedResultName":  "AI Lead Qualification CRM",
+                                                            "cachedResultUrl":  "https://docs.google.com/spreadsheets/d/1LOUy9KIHJrAbuJg4oI0syiuPqvmiyin_-ykQtkPIa6A/edit?usp=drivesdk"
+                                                        },
+                                         "sheetName":  {
+                                                           "__rl":  true,
+                                                           "value":  "gid=0",
+                                                           "mode":  "list",
+                                                           "cachedResultName":  "Sheet1",
+                                                           "cachedResultUrl":  "https://docs.google.com/spreadsheets/d/1LOUy9KIHJrAbuJg4oI0syiuPqvmiyin_-ykQtkPIa6A/edit#gid=0"
+                                                       },
+                                         "columns":  {
+                                                         "mappingMode":  "defineBelow",
+                                                         "value":  {
+                                                                       "lead_id":  "={{ $(\u0027CRM Record\u0027).item.json.lead_id }}",
+                                                                       "name":  "={{ $(\u0027CRM Record\u0027).item.json.name }}",
+                                                                       "company":  "={{ $(\u0027CRM Record\u0027).item.json.company }}",
+                                                                       "email":  "={{ $(\u0027CRM Record\u0027).item.json.email }}",
+                                                                       "service_required":  "={{ $(\u0027CRM Record\u0027).item.json.service_required }}",
+                                                                       "budget":  "={{ $(\u0027CRM Record\u0027).item.json.budget }}",
+                                                                       "timeline":  "={{ $(\u0027CRM Record\u0027).item.json.timeline }}",
+                                                                       "score":  "={{ $(\u0027CRM Record\u0027).item.json.score }}",
+                                                                       "priority":  "={{ $(\u0027CRM Record\u0027).item.json.priority }}",
+                                                                       "recommended_action":  "={{ $(\u0027CRM Record\u0027).item.json.recommended_action }}",
+                                                                       "follow_up_priority":  "={{ $(\u0027CRM Record\u0027).item.json.follow_up_priority }}"
+                                                                   },
+                                                         "matchingColumns":  [
+                                                                                 "lead_id"
+                                                                             ],
+                                                         "schema":  [
+                                                                        {
+                                                                            "id":  "lead_id",
+                                                                            "displayName":  "lead_id",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "name",
+                                                                            "displayName":  "name",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "company",
+                                                                            "displayName":  "company",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "email",
+                                                                            "displayName":  "email",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "service_required",
+                                                                            "displayName":  "service_required",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "budget",
+                                                                            "displayName":  "budget",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "timeline",
+                                                                            "displayName":  "timeline",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "score",
+                                                                            "displayName":  "score",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "priority",
+                                                                            "displayName":  "priority",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "recommended_action",
+                                                                            "displayName":  "recommended_action",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "follow_up_priority",
+                                                                            "displayName":  "follow_up_priority",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "row_number",
+                                                                            "displayName":  "row_number",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "number",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "readOnly":  true,
+                                                                            "removed":  true
+                                                                        }
+                                                                    ],
+                                                         "attemptToConvertTypes":  false,
+                                                         "convertFieldsToString":  false
+                                                     },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.googleSheets",
+                      "typeVersion":  4.7,
+                      "position":  [
+                                       2240,
+                                       -64
+                                   ],
+                      "id":  "3a029eff-1f67-4a7d-b1c8-b9239ed0ddb4",
+                      "name":  "Update Existing Lead"
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "// Loop over input items and add a new field called \u0027myNewField\u0027 to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();"
+                                     },
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       1568,
+                                       32
+                                   ],
+                      "id":  "2728031d-8c66-48ea-9505-bfe83b6e4805",
+                      "name":  "Prepare CRM Lookup"
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "append",
+                                         "documentId":  {
+                                                            "__rl":  true,
+                                                            "value":  "1LOUy9KIHJrAbuJg4oI0syiuPqvmiyin_-ykQtkPIa6A",
+                                                            "mode":  "list",
+                                                            "cachedResultName":  "AI Lead Qualification CRM",
+                                                            "cachedResultUrl":  "https://docs.google.com/spreadsheets/d/1LOUy9KIHJrAbuJg4oI0syiuPqvmiyin_-ykQtkPIa6A/edit?usp=drivesdk"
+                                                        },
+                                         "sheetName":  {
+                                                           "__rl":  true,
+                                                           "value":  "gid=0",
+                                                           "mode":  "list",
+                                                           "cachedResultName":  "Sheet1",
+                                                           "cachedResultUrl":  "https://docs.google.com/spreadsheets/d/1LOUy9KIHJrAbuJg4oI0syiuPqvmiyin_-ykQtkPIa6A/edit#gid=0"
+                                                       },
+                                         "columns":  {
+                                                         "mappingMode":  "defineBelow",
+                                                         "value":  {
+                                                                       "lead_id":  "={{ $(\u0027CRM Record\u0027).item.json.lead_id }}",
+                                                                       "company":  "={{ $(\u0027CRM Record\u0027).item.json.company }}",
+                                                                       "name":  "={{ $(\u0027CRM Record\u0027).item.json.name }}",
+                                                                       "email":  "={{ $(\u0027CRM Record\u0027).item.json.email }}",
+                                                                       "service_required":  "={{ $(\u0027CRM Record\u0027).item.json.service_required }}",
+                                                                       "timeline":  "={{ $(\u0027CRM Record\u0027).item.json.timeline }}",
+                                                                       "budget":  "={{ $(\u0027CRM Record\u0027).item.json.budget }}",
+                                                                       "score":  "={{ $(\u0027CRM Record\u0027).item.json.score }}",
+                                                                       "priority":  "={{ $(\u0027CRM Record\u0027).item.json.priority }}",
+                                                                       "recommended_action":  "={{ $(\u0027CRM Record\u0027).item.json.recommended_action }}",
+                                                                       "follow_up_priority":  "={{ $(\u0027CRM Record\u0027).item.json.follow_up_priority }}"
+                                                                   },
+                                                         "matchingColumns":  [
+
+                                                                             ],
+                                                         "schema":  [
+                                                                        {
+                                                                            "id":  "lead_id",
+                                                                            "displayName":  "lead_id",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "name",
+                                                                            "displayName":  "name",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "company",
+                                                                            "displayName":  "company",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "email",
+                                                                            "displayName":  "email",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "service_required",
+                                                                            "displayName":  "service_required",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "budget",
+                                                                            "displayName":  "budget",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "timeline",
+                                                                            "displayName":  "timeline",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "score",
+                                                                            "displayName":  "score",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "priority",
+                                                                            "displayName":  "priority",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "recommended_action",
+                                                                            "displayName":  "recommended_action",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "follow_up_priority",
+                                                                            "displayName":  "follow_up_priority",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        }
+                                                                    ],
+                                                         "attemptToConvertTypes":  false,
+                                                         "convertFieldsToString":  false
+                                                     },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.googleSheets",
+                      "typeVersion":  4.7,
+                      "position":  [
+                                       2240,
+                                       128
+                                   ],
+                      "id":  "8a4aa3bf-b867-4eec-bd49-db39584144bf",
+                      "name":  "Append row in sheet"
+                  },
+                  {
+                      "parameters":  {
+
+                                     },
+                      "type":  "n8n-nodes-base.merge",
+                      "typeVersion":  3.2,
+                      "position":  [
+                                       2464,
+                                       32
+                                   ],
+                      "id":  "f7e07955-6372-4906-a9f8-258e130d3c59",
+                      "name":  "Merge"
+                  },
+                  {
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  true,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "strict",
+                                                                            "version":  3
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "5719efb7-4d92-4856-8eb1-2e6372e20e5d",
+                                                                                   "leftValue":  "={{ $json.priority }}",
+                                                                                   "rightValue":  "Medium Priority",
+                                                                                   "operator":  {
+                                                                                                    "type":  "string",
+                                                                                                    "operation":  "equals",
+                                                                                                    "name":  "filter.operator.equals"
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2.3,
+                      "position":  [
+                                       2688,
+                                       32
+                                   ],
+                      "id":  "7ba0d257-31e8-4dcf-ba5d-b89c230b9483",
+                      "name":  "Medium Priority IF"
+                  },
+                  {
+                      "parameters":  {
+                                         "sendTo":  "shivobuli@gmail.com",
+                                         "subject":  "=Medium Priority Lead - {{ $json.name }} - {{ $json.company }}",
+                                         "message":  "=Medium Priority Lead  Lead ID: {{ $json.lead_id }} Name: {{ $json.name }} Company: {{ $json.company }} Email: {{ $json.email }}  Service Required: {{ $json.service_required }} Budget: {{ $json.budget }} Timeline: {{ $json.timeline }}  Qualification Score: {{ $json.score }} Priority: {{ $json.priority }}  Recommended Action: {{ $json.recommended_action }} Follow-up Priority: {{ $json.follow_up_priority }}  Please follow up within 2 business days.",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.gmail",
+                      "typeVersion":  2.2,
+                      "position":  [
+                                       2928,
+                                       -64
+                                   ],
+                      "id":  "4f188105-1df2-42e0-91c3-5b26d12aba44",
+                      "name":  "Gmail (Medium Priority)",
+                      "webhookId":  "55426f99-6df2-4144-985c-5e7271836451"
+                  },
+                  {
+                      "parameters":  {
+                                         "sendTo":  "shivobuli@gmail.com",
+                                         "subject":  "=New High Priority Lead - {{ $json.name }} - {{ $json.company }}",
+                                         "message":  "=New Lead Qualification Alert  Lead ID: {{ $json.lead_id }} Name: {{ $json.name }} Company: {{ $json.company }} Email: {{ $json.email }}  Service Required: {{ $json.service_required }} Budget: {{ $json.budget }} Timeline: {{ $json.timeline }}  Qualification Score: {{ $json.score }} Priority: {{ $json.priority }}  Recommended Action: {{ $json.recommended_action }} Follow-up Priority: {{ $json.follow_up_priority }}  Please review and follow up accordingly.",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.gmail",
+                      "typeVersion":  2.2,
+                      "position":  [
+                                       3136,
+                                       32
+                                   ],
+                      "id":  "60d685f9-a0e9-4817-a339-e51aacc11e0b",
+                      "name":  "Gmail - (High Priority)",
+                      "webhookId":  "35a2ca77-8e78-4e8f-9a01-648b2e6de3a9"
+                  }
+              ],
+    "pinData":  {
+
+                },
+    "connections":  {
+                        "When clicking ‘Execute workflow’":  {
+                                                                     "main":  [
+                                                                                  [
+                                                                                      {
+                                                                                          "node":  "Lead Input",
+                                                                                          "type":  "main",
+                                                                                          "index":  0
+                                                                                      }
+                                                                                  ]
+                                                                              ]
+                                                                 },
+                        "Lead Input":  {
+                                           "main":  [
+                                                        [
+                                                            {
+                                                                "node":  "Validate Lead",
+                                                                "type":  "main",
+                                                                "index":  0
+                                                            }
+                                                        ]
+                                                    ]
+                                       },
+                        "Validate Lead":  {
+                                              "main":  [
+                                                           [
+                                                               {
+                                                                   "node":  "Analyze Lead",
+                                                                   "type":  "main",
+                                                                   "index":  0
+                                                               }
+                                                           ]
+                                                       ]
+                                          },
+                        "Analyze Lead":  {
+                                             "main":  [
+                                                          [
+                                                              {
+                                                                  "node":  "Calculate Score",
+                                                                  "type":  "main",
+                                                                  "index":  0
+                                                              }
+                                                          ]
+                                                      ]
+                                         },
+                        "Calculate Score":  {
+                                                "main":  [
+                                                             [
+                                                                 {
+                                                                     "node":  "Recommend Action",
+                                                                     "type":  "main",
+                                                                     "index":  0
+                                                                 }
+                                                             ]
+                                                         ]
+                                            },
+                        "Recommend Action":  {
+                                                 "main":  [
+                                                              [
+                                                                  {
+                                                                      "node":  "CRM Record",
+                                                                      "type":  "main",
+                                                                      "index":  0
+                                                                  }
+                                                              ]
+                                                          ]
+                                             },
+                        "CRM Record":  {
+                                           "main":  [
+                                                        [
+                                                            {
+                                                                "node":  "Prepare CRM Lookup",
+                                                                "type":  "main",
+                                                                "index":  0
+                                                            }
+                                                        ]
+                                                    ]
+                                       },
+                        "High Priority Review":  {
+                                                     "main":  [
+                                                                  [
+                                                                      {
+                                                                          "node":  "Gmail - (High Priority)",
+                                                                          "type":  "main",
+                                                                          "index":  0
+                                                                      }
+                                                                  ]
+                                                              ]
+                                                 },
+                        "Get row(s) in sheet":  {
+                                                    "main":  [
+                                                                 [
+                                                                     {
+                                                                         "node":  "Lead Already Exists?",
+                                                                         "type":  "main",
+                                                                         "index":  0
+                                                                     }
+                                                                 ]
+                                                             ]
+                                                },
+                        "Lead Already Exists?":  {
+                                                     "main":  [
+                                                                  [
+                                                                      {
+                                                                          "node":  "Update Existing Lead",
+                                                                          "type":  "main",
+                                                                          "index":  0
+                                                                      }
+                                                                  ],
+                                                                  [
+                                                                      {
+                                                                          "node":  "Append row in sheet",
+                                                                          "type":  "main",
+                                                                          "index":  0
+                                                                      }
+                                                                  ]
+                                                              ]
+                                                 },
+                        "Update Existing Lead":  {
+                                                     "main":  [
+                                                                  [
+                                                                      {
+                                                                          "node":  "Merge",
+                                                                          "type":  "main",
+                                                                          "index":  0
+                                                                      }
+                                                                  ]
+                                                              ]
+                                                 },
+                        "Prepare CRM Lookup":  {
+                                                   "main":  [
+                                                                [
+                                                                    {
+                                                                        "node":  "Get row(s) in sheet",
+                                                                        "type":  "main",
+                                                                        "index":  0
+                                                                    }
+                                                                ]
+                                                            ]
+                                               },
+                        "Append row in sheet":  {
+                                                    "main":  [
+                                                                 [
+                                                                     {
+                                                                         "node":  "Merge",
+                                                                         "type":  "main",
+                                                                         "index":  1
+                                                                     }
+                                                                 ]
+                                                             ]
+                                                },
+                        "Merge":  {
+                                      "main":  [
+                                                   [
+                                                       {
+                                                           "node":  "Medium Priority IF",
+                                                           "type":  "main",
+                                                           "index":  0
+                                                       }
+                                                   ]
+                                               ]
+                                  },
+                        "Medium Priority IF":  {
+                                                   "main":  [
+                                                                [
+                                                                    {
+                                                                        "node":  "Gmail (Medium Priority)",
+                                                                        "type":  "main",
+                                                                        "index":  0
+                                                                    }
+                                                                ],
+                                                                [
+                                                                    {
+                                                                        "node":  "High Priority Review",
+                                                                        "type":  "main",
+                                                                        "index":  0
+                                                                    }
+                                                                ]
+                                                            ]
+                                               }
+                    },
+    "active":  false,
+    "settings":  {
+                     "executionOrder":  "v1",
+                     "binaryMode":  "separate"
+                 },
+    "versionId":  "562caced-5ca5-40dd-8692-fae64b7bb4cd",
+    "meta":  {
+                 "templateCredsSetupCompleted":  true,
+                 "instanceId":  "1cb9dca5937c1e069af922d18aa089d265504be1eee2e89d2378e0995d935491"
+             },
+    "nodeGroups":  [
+
+                   ],
+    "id":  "5GadxOG292gVDR7D",
+    "tags":  [
+
+             ]
+}
